@@ -226,6 +226,7 @@ private struct GeneralSettings: View {
     @State private var name = ""
     @AppStorage(MotionPreference.key) private var reduceMotion = false
     @AppStorage(OneTimeCode.autoCopyKey) private var copyCodes = false
+    @AppStorage("tether_auto_clipboard_sync") private var autoClipboardSync = false
     @AppStorage(CallMediaPauser.settingKey) private var pauseMediaDuringCalls = true
     @AppStorage(CallCard.settingKey) private var showCallCard = true
     @AppStorage(AwayLock.settingKey) private var lockWhenPhoneLeaves = false
@@ -251,6 +252,10 @@ private struct GeneralSettings: View {
                 Toggle(isOn: $reduceMotion) {
                     Text("Reduce motion")
                     Text("Turns off Tether's animations, such as the drop highlight and list changes.")
+                }
+                Toggle(isOn: $autoClipboardSync) {
+                    Text("Automatically sync Mac clipboard")
+                    Text("Off by default. Use the Clipboard button in the menu bar to send copied text manually. Keep Share clipboard enabled for your phone.")
                 }
                 Toggle(isOn: $copyCodes) {
                     Text("Copy verification codes automatically")

@@ -335,7 +335,10 @@ public final class NotificationPlugin: NSObject, ObservableObject, TetherPlugin,
         // Recheck after an image wait: WhatsApp may have launched meanwhile.
         guard !NativeNotificationFilter.shouldSuppress(item) else { return }
         let content = UNMutableNotificationContent()
-        content.title = item.title.isEmpty ? item.appName : "\(item.appName): \(item.title)"
+        content.title = item.title.isEmpty ? item.appName : item.title
+        if !item.title.isEmpty && item.appName != item.title {
+            content.subtitle = item.appName
+        }
         content.body = item.text
         content.sound = .default
         content.categoryIdentifier = item.code == nil ? "TETHER_NOTIFICATION_CATEGORY" : "TETHER_CODE_CATEGORY"
