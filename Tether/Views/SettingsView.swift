@@ -227,6 +227,7 @@ private struct GeneralSettings: View {
     @AppStorage(MotionPreference.key) private var reduceMotion = false
     @AppStorage(OneTimeCode.autoCopyKey) private var copyCodes = false
     @AppStorage("tether_auto_clipboard_sync") private var autoClipboardSync = false
+    @AppStorage(CustomNotificationBanner.settingKey) private var customBanners = false
     @AppStorage(CallMediaPauser.settingKey) private var pauseMediaDuringCalls = true
     @AppStorage(CallCard.settingKey) private var showCallCard = true
     @AppStorage(AwayLock.settingKey) private var lockWhenPhoneLeaves = false
@@ -252,6 +253,10 @@ private struct GeneralSettings: View {
                 Toggle(isOn: $reduceMotion) {
                     Text("Reduce motion")
                     Text("Turns off Tether's animations, such as the drop highlight and list changes.")
+                }
+                Toggle(isOn: $customBanners) {
+                    Text("Custom notification banners (experimental)")
+                    Text("AppKit banners with the Android icon on the right. Native Notification Center history and Focus behavior are unavailable in this mode.")
                 }
                 Toggle(isOn: $autoClipboardSync) {
                     Text("Automatically sync Mac clipboard")
