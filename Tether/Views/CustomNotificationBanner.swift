@@ -1,4 +1,5 @@
 import AppKit
+import QuartzCore
 
 /// Lightweight, event-driven custom banners. This deliberately does not replace
 /// Notification Center history or system Focus integration.
