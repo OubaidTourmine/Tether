@@ -11,11 +11,13 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Select recent Xcode and show version
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
       - name: Build unsigned Apple Silicon app
         run: |
           xcodebuild -project Tether.xcodeproj -scheme Tether -configuration Release \
