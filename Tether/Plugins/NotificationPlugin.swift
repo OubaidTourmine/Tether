@@ -334,6 +334,10 @@ public final class NotificationPlugin: NSObject, ObservableObject, TetherPlugin,
     private func post(_ item: PhoneNotification) {
         // Recheck after an image wait: WhatsApp may have launched meanwhile.
         guard !NativeNotificationFilter.shouldSuppress(item) else { return }
+        if UserDefaults.standard.bool(forKey: CustomNotificationBanner.settingKey) {
+            Task { @MainActor in CustomNotificationBanner.shared.show(item) }
+            return
+        }
         let content = UNMutableNotificationContent()
         // Compact, app-aware formatting for common messaging notifications.
         // Native macOS controls banner icon placement and vertical alignment.
