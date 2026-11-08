@@ -335,11 +335,25 @@ public final class NotificationPlugin: NSObject, ObservableObject, TetherPlugin,
         // Recheck after an image wait: WhatsApp may have launched meanwhile.
         guard !NativeNotificationFilter.shouldSuppress(item) else { return }
         let content = UNMutableNotificationContent()
-        content.title = item.title.isEmpty ? item.appName : item.title
-        if !item.title.isEmpty && item.appName != item.title {
-            content.subtitle = item.appName
+        // Compact, app-aware formatting for common messaging notifications.
+        // Native macOS controls banner icon placement and vertical alignment.
+        let app = item.appName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sender = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let message = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let supportedApps = ["whatsapp", "instagram", "telegram", "discord"]
+        let isMessagingApp = supportedApps.contains { app.localizedCaseInsensitiveContains($0) }
+        if isMessagingApp {
+            // Use two lines instead of a redundant third subtitle line.
+            content.title = sender.isEmpty || sender.caseInsensitiveCompare(app) == .orderedSame
+                ? app : "\(app) · \(sender)"
+            content.body = message
+        } else {
+            content.title = sender.isEmpty ? app : sender
+            if !sender.isEmpty && app.caseInsensitiveCompare(sender) != .orderedSame {
+                content.subtitle = app
+            }
+            content.body = message
         }
-        content.body = item.text
         content.sound = .default
         content.categoryIdentifier = item.code == nil ? "TETHER_NOTIFICATION_CATEGORY" : "TETHER_CODE_CATEGORY"
         content.userInfo = [
