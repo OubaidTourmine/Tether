@@ -37,6 +37,11 @@ public final class ClipboardPlugin: TetherPlugin, @unchecked Sendable {
     }
 
     private func checkPasteboard() {
+        // Manual-only by default: the menu-bar Send Clipboard action remains available.
+        guard UserDefaults.standard.bool(forKey: "tether_auto_clipboard_sync") else {
+            lastChangeCount = NSPasteboard.general.changeCount
+            return
+        }
         let currentCount = NSPasteboard.general.changeCount
         guard currentCount != lastChangeCount else { return }
         lastChangeCount = currentCount
