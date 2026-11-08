@@ -1,0 +1,44 @@
+name: Build Tether Apple Silicon DMG
+
+on:
+  push:
+    branches:
+      - feature/manual-clipboard-notification-format
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build unsigned Apple Silicon app
+        run: |
+          xcodebuild -project Tether.xcodeproj -scheme Tether -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/tether-build" \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build -quiet
+      - name: Package DMG
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/tether-build/Build/Products/Release/Tether.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/dmg" dist
+          ditto "$APP" "$RUNNER_TEMP/dmg/Tether.app"
+          ln -s /Applications "$RUNNER_TEMP/dmg/Applications"
+          hdiutil create -volname "Tether Custom" -srcfolder "$RUNNER_TEMP/dmg" \
+            -format UDZO -ov "dist/Tether-Custom-AppleSilicon.dmg"
+          hdiutil verify "dist/Tether-Custom-AppleSilicon.dmg"
+          shasum -a 256 dist/Tether-Custom-AppleSilicon.dmg
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tether-Custom-AppleSilicon-DMG
+          path: dist/Tether-Custom-AppleSilicon.dmg
+          if-no-files-found: error
