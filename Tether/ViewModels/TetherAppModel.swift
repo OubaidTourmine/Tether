@@ -223,9 +223,19 @@ public final class TetherAppModel {
 
         vm.onPing = { service.sendPing(to: deviceId) }
         vm.onSendClipboard = {
-            if let text = NSPasteboard.general.string(forType: .string) {
-                service.clipboardPlugin.broadcastClipboard(content: text)
+            guard let text = NSPasteboard.general.string(forType: .string), !text.isEmpty else {
+                TetherLog("[ClipboardPlugin] Manual send skipped: clipboard contains no text")
+                return
             }
+            // Send on the device's live connection rather than relying on the
+            // clipboard plugin's independently maintained connection registry.
+            guard TrustStore.shared.pairedDevice(for: deviceId)?.isClipboardSyncEnabled == true else {
+                TetherLog("[ClipboardPlugin] Manual send blocked: Share clipboard disabled for \(deviceId)")
+                return
+            }
+            let packet = NetworkPacket(type: "kdeconnect.clipboard", body: ["content": text])
+            connection.send(packet: packet)
+            TetherLog("[ClipboardPlugin] Manual clipboard packet queued for \(deviceId)")
         }
         vm.onSendFiles = { urls in service.sendFiles(urls, to: deviceId) }
         vm.onFindPhone = { service.ringPhone(deviceId) }
